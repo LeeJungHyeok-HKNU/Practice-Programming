@@ -3,7 +3,7 @@
     Army Personal Management
 
         2020-06-01
-        Lee JungHyeok
+        Lee JungHyeok.
         
         이 프로그램은 아래와 같은 기능을 수행합니다.
 
