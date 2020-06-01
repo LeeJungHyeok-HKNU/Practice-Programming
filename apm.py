@@ -3,6 +3,7 @@
     Army Personal Management
 
         2020-06-01
+        Lee JungHyeok
         
         이 프로그램은 아래와 같은 기능을 수행합니다.
 
@@ -42,7 +43,7 @@ import pandas as pd
 import time
 
 soldiers = []
-excel_file = '3corps_soldiers.xlsx'
+excel_file = 'files/3corps_soldiers.xlsx'
 writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
 
 
@@ -129,6 +130,8 @@ def login():
     """
     
     permission = False
+
+    
     
     return permission
 
