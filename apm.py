@@ -1,8 +1,8 @@
 
 """
     Army Personal Management
-
-        2020-06-01
+        
+        2020-06-02
         Lee JungHyeok.
         
         이 프로그램은 아래와 같은 기능을 수행합니다.
@@ -16,6 +16,8 @@
         - 병사 휴가 조회
         - 병사 휴가 추가
         - 병사 휴가 사용
+        - 병사 휴가 수정 (2020-06-02)
+        - 전역자 신상 삭제 (2020-06-02)
         - 모든 병사 휴가 추가
         - 프로그램을 종료하지 않고 저장
         - 저장 후 프로그램 종료
@@ -30,21 +32,27 @@
             전역일
             휴가
 
+        Fur = Furlough, Sol = Soldier.
+        
+        
         추가될 기능
 
-        - 휴가 수정
         - 휴가자 현황
-        - 전역한 병사의 신상 삭제
-        - 로그인 시스템
-                
+        - 로그인 시스템 (암호화)
+        
 """
 
 import pandas as pd
 import time
+import login
 
 soldiers = []
 excel_file = 'files/3corps_soldiers.xlsx'
-writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
+try:
+    writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
+except:
+    print("파일을 찾을 수 없습니다.")
+    exit()
 
 
 class soldier():
@@ -66,7 +74,7 @@ class soldier():
         self.furlough = []
         soldiers.append(self)
         
-    def printFurlough(self):
+    def printFur(self):
 
         """
         
@@ -106,36 +114,8 @@ class soldier():
         else:
             print(self.name, "는 휴가가 없습니다.")
             return 0
-class furlough():
 
-    """
-        
-        휴가 클래스입니다.
-        
-    """
-    
-    def __init__(self, typ, term, date, deadline):
-        self.type = typ
-        self.term = term
-        self.date = date
-        self.deadline = deadline
-
-def login():
-
-    """
-
-        로그인 시스템입니다.
-        아직 구현 전입니다.
-    
-    """
-    
-    permission = False
-
-    
-    
-    return permission
-
-def loadSoldiers():
+def loadSol():
 
     """
 
@@ -154,7 +134,7 @@ def loadSoldiers():
             tmp_fur = furlough(sol[2], int(sol[3]), sol[4], sol[5])
             tmp_sol.furlough.append(tmp_fur)
 
-def findSoldier_ac(armyCode):
+def findSol_ac(armyCode):
 
     """
 
@@ -171,7 +151,7 @@ def findSoldier_ac(armyCode):
         print(armyCode, "군번에 맞는 병사를 찾을 수 없습니다.")
     return result
 
-def showSoldiers():
+def showSols():
 
     """
 
@@ -199,12 +179,12 @@ def showSoldiers():
     else:
         print("부대에 병사가 없습니다.")
         
-def showSoldiersFurlough():
+def showSolsFur():
 
     """
 
         모든 병사의 신상과 휴가를 print합니다.
-        배열 soldiers에 있는 객체들의 정보 및 해당 병사의 휴가를 soldier.printFurlough()를 이용해 print합니다.
+        배열 soldiers에 있는 객체들의 정보 및 해당 병사의 휴가를 soldier.printFur()를 이용해 print합니다.
     
     """
     
@@ -223,37 +203,45 @@ def showSoldiersFurlough():
             print('군번: ', sol.armyCode)
             print('입대일: ', sol.indate)
             print('전역일: ', sol.outdate, end='\n\n')
-            sol.printFurlough()
+            sol.printFur()
             print('\n')
             
         print("\n총계: ", len(soldiers))
     else:
         print("부대에 병사가 없습니다.")
 
-def addSoldier():
+def addSol():
 
     """
 
         soldiers에 새로운 병사를 한 명 추가합니다.
         soldier의 attributes를 입력받아 새 soldier 객체를 생성합니다.
-    
+
     """
     
     print("병사를 추가합니다. 정보를 입력하세요.\n")
     name = input("이름: ")
     armyCode = input("군번: ")
     while 1:
-        rank = int(input("계급(1~4): "))
+        try:
+            rank = int(input("계급(1~4): "))
+        except:
+            print("정수로 입력하세요.")
+            continue
         if (rank > 0) and (rank< 5):
             break
         else:
-            print("잘못된 입력입니다.")
+            print("1 = 이병, 2 = 일병, 3 = 상병, 4 = 병장 입니다. 다시 입력해주세요.\n")
     while 1:
         print("1: 본부")
         print("2: 경비")
         print("3: 수송")
         print("4: 군악")
-        plat = int(input("소대: "))
+        try:
+            plat = int(input("소대: "))
+        except:
+            print("정수로 입력하세요.")
+            continue
         if plat == 1:
             platoon = "본부"
             break
@@ -273,64 +261,7 @@ def addSoldier():
     outdate = input("전역일: ")
     soldier(name, armyCode, rank, platoon, squad, indate, outdate)
 
-def addFurlough(sol):
-
-    """
-
-        한 병사에게 휴가를 부여합니다.
-        soldier class를 인수로 받고 입력받은 휴가를 furlough class로 만들어 해당 객체의 furlough attribute에 추가합니다.
-    
-    """
-    
-    print(sol.platoon, sol.name, "에게 추가할 휴가의 정보를 입력하세요.")
-    typ = input("휴가 종류: ")
-    term = int(input("휴가 기간: "))
-    date = input("받은 날짜: ")
-    if typ[-4:len(typ)] != "위로휴가":
-        deadline = int(input("사용 기한: "))
-    else:
-        deadline = 18
-    furlough_tmp = furlough(typ, term, date, deadline)
-    sol.furlough.append(furlough_tmp)
-    print("휴가가 추가되었습니다.")
-
-def addFurloughAll():
-
-    """
-
-        모든 병사에게 휴가를 부여합니다.
-        입력받은 휴가를 furlough class로 만들어 soldiers의 모든 soldier 객체의 furlough attribute에 추가합니다.
-    
-    """
-    
-    print("모든 병사에게 추가할 휴가를 입력하세요.")
-    typ = input("휴가 종류: ")
-    term = int(input("휴가 기간: "))
-    date = input("받은 날짜: ")
-    if typ[-4:len(typ)] != "위로휴가":
-        deadline = int(input("사용 기한: "))
-    else:
-        deadline = 18
-    furlough_tmp = furlough(typ, term, date, deadline)
-    for sol in soldiers:
-        sol.furlough.append(furlough_tmp)
-    print("모든 병사에게 휴가를 추가하였습니다.")
-
-def useFurlough(sol):
-
-    """
-
-        한 병사의 휴가를 사용합니다. 현재로선 삭제와 같습니다.(2020-05-31)
-        soldier class를 인수로 받고 입력받은 휴가 번호에 해당하는 furlough class를 soldier.furlough 배열에서 삭제합니다.
-    
-    """
-    
-    if sol.printFurlough() == 0:
-        return 0
-    index_fur = int(input("사용할 휴가 번호를 입력하세요.\n"))-1
-    sol.furlough.remove(sol.furlough[index_fur])
-
-def editSoldier(sol):
+def editSol(sol):
 
     """
 
@@ -361,8 +292,31 @@ def editSoldier(sol):
         try:
             pick = int(input("\n1. 소대\n2. 분대\n3. 계급\n4. 이름\n5. 군번\n6. 입대일\n7. 전역일\n8. 취소\n\n"))
             if pick == 1:
-                newPlatoon = input("새로운 소대를 입력하세요.\n")
-                print('소대를', newPlatoon, "(으)로 설정하시겠습니까?", end='')
+                while 1:
+                    print("1: 본부")
+                    print("2: 경비")
+                    print("3: 수송")
+                    print("4: 군악")
+                    try:
+                        plat = int(input("새로운 소대를 입력하세요.\n "))
+                    except:
+                        print("정수로 입력하세요.")
+                        continue
+                    if plat == 1:
+                        newPlatoon = "본부"
+                        break
+                    elif plat == 2:
+                        newPlatoon = "경비"
+                        break
+                    elif plat == 3:
+                        newPlatoon = "수송"
+                        break
+                    elif plat == 4:
+                        newPlatoon = "군악"
+                        break
+                    else:
+                        print("잘못된 입력입니다.")
+                print("소대를", newPlatoon, "(으)로 설정하시겠습니까?", end='')
                 yes = input("(Y/N)\n")
                 if yes.upper() == 'Y':
                     sol.platoon = newPlatoon
@@ -379,11 +333,12 @@ def editSoldier(sol):
                 else:
                     print("취소합니다.")
             elif pick == 3:
-                try:
-                    newRank = int(input("새로운 계급(1~4)를 입력하세요.\n"))
-                except:
-                    print("1~4 정수로 입력해주세요.\n")
-                    continue
+                while 1:
+                    try:
+                        newRank = int(input("새로운 계급(1~4)를 입력하세요.\n"))
+                        break
+                    except:
+                        print("1~4 정수로 입력해주세요.\n")
                 print('계급을', newRank, "(으)로 설정하시겠습니까?", end='')
                 yes = input("(Y/N)\n")
                 if yes.upper() == 'Y':
@@ -437,6 +392,212 @@ def editSoldier(sol):
         except:
             print("1~8 정수로 다시 입력해주세요.")
 
+def delSols():
+    nDeleted = 0
+    for sol in soldiers:
+        if int(time.mktime(time.strptime(sol.outdate, "%Y-%m-%d"))) < time.time():
+            print(sol.platoon, sol.name, "의 신상 정보를 삭제합니다.")
+            soldiers.remove(sol)
+            nDeleted += 1
+    print(nDeleted, "명의 신상이 삭제되었습니다.")
+            
+
+
+
+
+
+
+
+
+class furlough():
+
+    """
+        
+        휴가 클래스입니다.
+        
+    """
+    
+    def __init__(self, typ, term, date, deadline):
+        self.type = typ
+        self.term = term
+        self.date = date
+        self.deadline = deadline
+
+def addFur(sol):
+
+    """
+
+        한 병사에게 휴가를 부여합니다.
+        soldier class를 인수로 받고 입력받은 휴가를 furlough class로 만들어 해당 객체의 furlough attribute에 추가합니다.
+    
+    """
+    
+    print(sol.platoon, sol.name, "에게 추가할 휴가의 정보를 입력하세요.")
+    typ = input("휴가 종류: ")
+    while 1:
+        try:
+            term = int(input("휴가 기간: "))
+            break
+        except:
+            print("정수로 입력하세요.")
+    date = input("받은 날짜: ")
+    if typ[-4:len(typ)] != "위로휴가":
+        deadline = int(input("사용 기한: "))
+    else:
+        deadline = 18
+    furlough_tmp = furlough(typ, term, date, deadline)
+    sol.furlough.append(furlough_tmp)
+    print("휴가가 추가되었습니다.")
+
+def addFurAll():
+
+    """
+
+        모든 병사에게 휴가를 부여합니다.
+        입력받은 휴가를 furlough class로 만들어 soldiers의 모든 soldier 객체의 furlough attribute에 추가합니다.
+    
+    """
+    
+    print("모든 병사에게 추가할 휴가를 입력하세요.")
+    typ = input("휴가 종류: ")
+    while 1:
+        try:
+            term = int(input("휴가 기간: "))
+            break
+        except:
+            print("정수로 입력하세요.")
+    date = input("받은 날짜: ")
+    if typ[-4:len(typ)] != "위로휴가":
+        while 1:
+            try:
+                deadline = int(input("사용 기한: "))
+                break
+            except:
+                print("정수로 입력하세요. (개월)")
+    else:
+        deadline = 18
+    furlough_tmp = furlough(typ, term, date, deadline)
+    for sol in soldiers:
+        sol.furlough.append(furlough_tmp)
+    print("모든 병사에게 휴가를 추가하였습니다.")
+
+def useFur(sol):
+
+    """
+
+        한 병사의 휴가를 사용합니다. 현재로선 삭제와 같습니다. (2020-05-31)
+        soldier class를 인수로 받고 입력받은 휴가 번호에 해당하는 furlough class를 soldier.furlough 배열에서 삭제합니다.
+    
+    """
+    
+    if sol.printFur() == 0:
+        return 0
+    index_fur = int(input("사용할 휴가 번호를 입력하세요.\n"))-1
+    sol.furlough[index_fur].term
+    startDate = input("출발 날짜를 입력하세요.(년-월-일)\n")
+    startDateStruct = time.strptime(startDate, "%Y-%m-%d")
+    endDateStruct = time.localtime(time.mktime(startDateStruct) + sol.furlough[index_fur].term*24*60*60 - 1*24*60*60)
+    
+    print("출발일:", startDateStruct.tm_year, '년', startDateStruct.tm_mon, '월', startDateStruct.tm_mday, '일 06시 30분')
+    print("복귀일:", endDateStruct.tm_year, '년', endDateStruct.tm_mon, '월', endDateStruct.tm_mday, '일 21시 30분')
+
+    if input("입력된 정보가 맞습니까?(Y/N)\n").upper() == 'Y':
+        sol.furlough.remove(sol.furlough[index_fur])
+        ############################sol.furlough[index_fur].addBoard(startDateStruct, endDateStruct)
+    else:
+        print("휴가 사용을 취소합니다.")
+
+def editFur(sol):
+
+    """
+
+        한 병사의 휴가를 수정합니다.
+        병사 신상 수정과 동일한 방식입니다.
+
+    """
+    
+    if sol.printFur() == 0:
+        return 0
+    index_fur = int(input("수정할 휴가 번호를 입력하세요.\n"))-1
+    
+    print("수정 전 데이터: ")
+    print("휴가 종류:", sol.furlough[index_fur].type)
+    print("휴가 기간:", sol.furlough[index_fur].term-1, "박", sol.furlough[index_fur].term, "일")
+    print("받은 날짜:", sol.furlough[index_fur].date)
+    print("사용 기한:", sol.furlough[index_fur].deadline)
+    
+    while 1:
+        print("수정할 데이터를 입력하세요.")
+        try:
+            pick = int(input("\n1. 휴가 종류\n2. 휴가 기간\n3. 받은 날짜\n4. 사용 기한\n5. 취소\n\n"))
+            if pick == 1:
+                newType = input("새로운 휴가 종류를 입력하세요.\n")
+                print("휴가 종류를", newType, "(으)로 설정하시겠습니까?", end='')
+                yes = input("(Y/N)\n")
+                if yes.upper() == 'Y':
+                    sol.furlough[index_fur].type = newType
+                    print("수정되었습니다.")
+                else:
+                    print("취소합니다.")
+            elif pick == 2:
+                while 1:
+                    try:
+                        newTerm = int(input("새로운 휴가 기간을 입력하세요.\n"))
+                        break
+                    except:
+                        print("정수로 입력하세요.")
+                if newTerm != 1:
+                    print("휴가 기간을", newTerm-1, "박", newTerm, "일로 설정하시겠습니까?", end='')
+                else:
+                    print("휴가 기간을 하루로 설정하시겠습니까?")
+                yes = input("(Y/N)\n")
+                
+                if yes.upper() == 'Y':
+                    sol.furlough[index_fur].term = newTerm
+                    print("수정되었습니다.")
+                else:
+                    print("취소합니다.")
+            elif pick == 3:
+                newDate = input("새로운 받은 날짜를 입력하세요.\n")
+                print("받은 날짜를", newDate, "로 설정하시겠습니까?", end='')
+                yes = input("(Y/N)\n")
+                if yes.upper() == 'Y':
+                    sol.furlough[index_fur].date = newDate
+                    print("수정되었습니다.")
+                else:
+                    print("취소합니다.")
+            elif pick == 4:
+                while 1:
+                    try:
+                        newDeadline =int(input("새로운 사용 기한을 입력하세요.\n"))
+                        break
+                    except:
+                        print("정수로 입력하세요.")
+                print("사용 기한을", newDeadline, "(으)로 설정하시겠습니까?", end='')
+                yes = input("(Y/N)\n")
+                if yes.upper() == 'Y':
+                    sol.furlough[index_fur].deadline = newDeadline
+                    print("수정되었습니다.")
+                else:
+                    print("취소합니다.")
+            elif pick == 5:
+                print("취소합니다.")
+                break
+                
+        except:
+            print("1~8 정수로 다시 입력해주세요.")
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def index():
@@ -446,13 +607,21 @@ def index():
         이 프로그램의 메인 루프입니다.
         pick에 0을 input하지 않는 이상 무한 반복합니다.
 
-        + 휴가 수정
-        + 휴가 현황 (휴가 사용)
-        + 전역한 병사 신상 삭제
-        + Think about every exception
-
     """
-
+    nShowSols = 1
+    nShowSolsFurs = 2
+    nFurBoard = 3
+    nAddSol = 4
+    nEditSol = 5
+    nShowFurs = 6
+    nAddFur = 7
+    nAddFursAll = 8
+    nUseFur = 9
+    nEditFur = 10
+    nDelSol = 11
+    nSave = 12
+    nExit = 13
+    
     pick = 0
     while 1:
         print("\n-----------APM-----------\n")
@@ -460,55 +629,68 @@ def index():
         
         print(time.ctime(time.time()), end = '\n\n')
         
-        print("1. 모든 병사 신상 조회")
-        print("2. 모든 병사 신상 및 휴가 조회")
-        print("3. 병사 신상 추가")
-        print("4. 병사 신상 수정")
-        print("5. 병사 휴가 조회")
-        print("6. 병사 휴가 추가")
-        print("7. 병사 휴가 사용")
-        print("8. 모든 병사 휴가 추가")
-        print("9. 프로그램을 종료하지 않고 저장")
-        print("0. 저장 후 프로그램 종료")
+        print(nShowSols, ". 모든 병사 신상 조회")              #1
+        print(nShowSolsFurs, ". 모든 병사 신상 및 휴가 조회")
+        print(nFurBoard, ". 휴가자 현황판")
+        print(nAddSol, ". 병사 신상 추가")
+        print(nEditSol, ". 병사 신상 수정")                          #5
+        print(nShowFurs, ". 병사 휴가 조회")
+        print(nAddFur, ". 병사 휴가 추가")
+        print(nAddFursAll, ". 모든 병사 휴가 추가")
+        print(nUseFur, ". 병사 휴가 사용")
+        print(nEditFur, ". 병사 휴가 수정")                        #10
+        print(nDelSol, ". 전역한 병사 신상 삭제")
+        print(nSave, ". 프로그램을 종료하지 않고 저장")
+        print(nExit, ". 저장 후 프로그램 종료")                 #13
+
         try:
             pick = int(input("\n"))
         except:
-            print("\n0~9 정수를 입력해주세요.")
+            print("\n1~13 정수를 입력해주세요.")
         if pick == 1:
-            showSoldiers()
+            showSols()
         elif pick == 2:
-            showSoldiersFurlough()
+            showSolsFur()
         elif pick == 3:
-            addSoldier()
+            showFurBoard()#########################
         elif pick == 4:
-            ac = input("수정할 병사의 군번을 입력하세요.\n")
-            sol = findSoldier_ac(ac)
-            if sol != 0:
-                editSoldier(sol)
+            addSol()
         elif pick == 5:
-            ac = input("휴가를 조회할 병사의 군번을 입력하세요.\n")
-            sol = findSoldier_ac(ac)
+            ac = input("수정할 병사의 군번을 입력하세요.\n")
+            sol = findSol_ac(ac)
             if sol != 0:
-                sol.printFurlough()
+                editSol(sol)
         elif pick == 6:
-            ac = input("휴가를 추가할 병사의 군번을 입력하세요.\n")
-            sol = findSoldier_ac(ac)
+            ac = input("휴가를 조회할 병사의 군번을 입력하세요.\n")
+            sol = findSol_ac(ac)
             if sol != 0:
-                addFurlough(sol)
+                sol.printFur()
         elif pick == 7:
-            ac = input("휴가를 사용할 병사의 군번을 입력하세요.\n")
-            sol = findSoldier_ac(ac)
+            ac = input("휴가를 추가할 병사의 군번을 입력하세요.\n")
+            sol = findSol_ac(ac)
             if sol != 0:
-                useFurlough(sol)
+                addFur(sol)
         elif pick == 8:
-            addFurloughAll()
+            addFurAll()
         elif pick == 9:
+            ac = input("휴가를 사용할 병사의 군번을 입력하세요.\n")
+            sol = findSol_ac(ac)
+            if sol != 0:
+                useFur(sol)
+        elif pick == 10:
+            ac = input("휴가를 수정할 병사의 군번을 입력하세요.\n")
+            sol = findSol_ac(ac)
+            if sol != 0:
+                editFur(sol)
+        elif pick == 11:
+            delSols()
+        elif pick == 12:
             try:
                 end()
                 print("저장되었습니다.")
             except:
                 print("\n종료 에러: 데이터 파일을 종료하고 다시 시도하세요.")
-        elif pick == 0:
+        elif pick == 13:
             try:
                 print("프로그램을 종료합니다.")
                 end()
@@ -521,7 +703,7 @@ def end():
 
     """
 
-        배열 soldiers를 DataFrame으로 만들어 파일(xlsx)에 작성합니다.
+        배열 soldiers의 각 병사의 휴가를 포함한 신상 정보를 DataFrame으로 만들어 파일(xlsx)에 작성합니다.
         휴가는 소지한 병사 밑의 2 열 부터 작성됩니다.
 
     """
@@ -564,5 +746,5 @@ def end():
     writer.save()
     return 0
 
-loadSoldiers()
+loadSol()
 index()
