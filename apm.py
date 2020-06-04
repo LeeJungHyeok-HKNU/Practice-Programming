@@ -2,7 +2,7 @@
 """
     Army Personal Management
         
-        2020-06-02
+        2020-06-04
         Lee JungHyeok.
         
         이 프로그램은 아래와 같은 기능을 수행합니다.
@@ -11,6 +11,7 @@
         
         - 모든 병사 신상 조회
         - 모든 병사 신상 및 휴가 조회
+        - 휴가자 현황 조회 (2020-06-04)
         - 병사 신상 추가
         - 병사 신상 수정
         - 병사 휴가 조회
@@ -37,22 +38,19 @@
         
         추가될 기능
 
-        - 휴가자 현황
+        - 휴가자 현황 (진행중)
+            - 이름(우측정렬)과 날짜 표시 (2020-06-04)
+            - 내용 저장(사용자, 사용일, 복귀일) (2020-06-04)
+            - 내용 불러옴(배열 solFur) (2020-06-04)
+        
         - 로그인 시스템 (암호화)
+        - 자동 암호화 기능
         
 """
 
 import pandas as pd
 import time
 import login
-
-soldiers = []
-excel_file = 'files/3corps_soldiers.xlsx'
-try:
-    writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
-except:
-    print("파일을 찾을 수 없습니다.")
-    exit()
 
 
 class soldier():
@@ -133,6 +131,12 @@ def loadSol():
         elif (sol[1] == '휴가'):
             tmp_fur = furlough(sol[2], int(sol[3]), sol[4], sol[5])
             tmp_sol.furlough.append(tmp_fur)
+        elif (sol[2] == '사용한 휴가'):
+            usedFurTmp = findUsedFur(tmp_sol)
+            if  usedFurTmp == 0:
+                board20.solFur.append([tmp_sol, [time.strptime(sol[3], "%Y-%m-%d"), time.strptime(sol[4], "%Y-%m-%d")]])
+            else:
+                usedFurTmp.append([sol[3], sol[4]])
 
 def findSol_ac(armyCode):
 
@@ -495,15 +499,15 @@ def useFur(sol):
     index_fur = int(input("사용할 휴가 번호를 입력하세요.\n"))-1
     sol.furlough[index_fur].term
     startDate = input("출발 날짜를 입력하세요.(년-월-일)\n")
-    startDateStruct = time.strptime(startDate, "%Y-%m-%d")
-    endDateStruct = time.localtime(time.mktime(startDateStruct) + sol.furlough[index_fur].term*24*60*60 - 1*24*60*60)
+    datestructStart = time.strptime(startDate, "%Y-%m-%d")
+    datestructEnd = time.localtime(time.mktime(datestructStart) + sol.furlough[index_fur].term*24*60*60 - 1*24*60*60)
     
-    print("출발일:", startDateStruct.tm_year, '년', startDateStruct.tm_mon, '월', startDateStruct.tm_mday, '일 06시 30분')
-    print("복귀일:", endDateStruct.tm_year, '년', endDateStruct.tm_mon, '월', endDateStruct.tm_mday, '일 21시 30분')
+    print("출발일:", datestructStart.tm_year, '년', datestructStart.tm_mon, '월', datestructStart.tm_mday, '일 06시 30분')
+    print("복귀일:", datestructEnd.tm_year, '년', datestructEnd.tm_mon, '월', datestructEnd.tm_mday, '일 21시 30분')
 
     if input("입력된 정보가 맞습니까?(Y/N)\n").upper() == 'Y':
         sol.furlough.remove(sol.furlough[index_fur])
-        ############################sol.furlough[index_fur].addBoard(startDateStruct, endDateStruct)
+        board20.writeFur(sol, datestructStart, datestructEnd)
     else:
         print("휴가 사용을 취소합니다.")
 
@@ -594,6 +598,107 @@ def editFur(sol):
 
 
 
+class board():
+    """
+
+        휴가 현황판 클래스 입니다. 년도를 인수로 받아 생성합니다.
+        12개의 배열을 가지는 배열 boardM을 가집니다.
+        boardM 속의 각 배열에는 달력과 같이 각 월에 맞는 일 수가 들어있습니다.
+        
+        
+    """
+    def __init__(self, year):
+        
+        self.year = year
+        
+        if (year%400 == 0) or ((year%100 != 0) and (year % 4 == 0)):
+            self.dateFeb = 29
+        else:
+            self.dateFeb = 28
+
+        self.solFur = [] # [sol, [dateStart, dateEnd], [], []]
+        
+        self.boardM = []
+
+        for month in range(12):
+            self.boardM.append([])
+            if month % 2 == 0:
+                dayrange = 31
+            elif month == 1:
+                dayrange = self.dateFeb
+            else:
+                dayrange = 30
+            for day in range(dayrange):
+                self.boardM[month].append(0)
+        
+        for i in range(12):
+            if i%2 == 0:
+                for j in range(31):
+                    if j < 9:
+                        self.boardM[i][j] = str(0) + str(j+1)
+                    else:
+                        self.boardM[i][j] = str(j+1)
+            elif i == 1:
+                for j in range(self.dateFeb):
+                    if j < 9:
+                        self.boardM[i][j] = str(0) + str(j+1)
+                    else:
+                        self.boardM[i][j] = str(j+1)
+            else:
+                for j in range(30):
+                    if j < 9:
+                        self.boardM[i][j] = str(0) + str(j+1)
+                    else:
+                        self.boardM[i][j] = str(j+1)
+
+    def writeFur(self, sol, dateStart, dateEnd):
+        solIndex = -1
+        for solFurTemp in self.solFur:
+            if solFurTemp[0] == sol:
+                solIndex = solFurTemp.index(solFurTemp)
+        if solIndex == -1:
+            self.solFur.append([sol, [dateStart, dateEnd]])
+        else:
+            self.solFur[solIndex].append([dateStart, dateEnd])
+    
+    def printBoard(self, month):
+        print("                     ", end = '')
+        for day in self.boardM[month-1]:
+            print("%4s"%day, end='')
+        print()
+        for solFurTemp in self.solFur:
+            monthFurs = []
+            for i in range(len(solFurTemp)-1):
+                if solFurTemp[i+1][0].tm_mon == month:
+                    monthFurs.append(solFurTemp[i+1])
+            print("%13s" %solFurTemp[0].name, end = '')
+            i=1
+            j = 0
+            if len(monthFurs) != 0:
+                while i < int(monthFurs[0][0].tm_mday):
+                    print("%4s"%'00', end='')
+                    i += 1
+                while j <= int(monthFurs[0][1].tm_mday) - int(monthFurs[0][0].tm_mday):
+                    print("%4s"%'88', end='')
+                    j += 1
+                if len(monthFurs) != 1:
+                    while i < int(monthFurs[1][0].tm_mday):
+                        print("%4s"%'00', end='')
+                        i += 1
+                    while j < int(monthFurs[1][1].tm_mday) - int(monthFurs[1][0].tm_mday):
+                        print("%4s"%'88', end='')
+                        j += 1
+                k = 0
+                while k <= len(self.boardM[month-1]) - (i+j):
+                    print("%4s"%'00', end='')
+                    k += 1
+
+def findUsedFur(sol):
+    for i in range(len(board20.solFur)):
+        if sol == board20.solFur[i][0]:
+            return board20.solFur[i]
+    return 0
+
 
 
 
@@ -652,7 +757,13 @@ def index():
         elif pick == 2:
             showSolsFur()
         elif pick == 3:
-            showFurBoard()#########################
+            while 1:
+                try:
+                    month = int(input("조회할 월을 입력하세요.\n"))
+                    board20.printBoard(month)
+                    break
+                except:
+                    print("1~12 정수를 입력하세요.")
         elif pick == 4:
             addSol()
         elif pick == 5:
@@ -692,12 +803,11 @@ def index():
                 print("\n종료 에러: 데이터 파일을 종료하고 다시 시도하세요.")
         elif pick == 13:
             try:
-                print("프로그램을 종료합니다.")
                 end()
+                print("프로그램을 종료합니다.")
                 break
             except:
                 print("\n종료 에러: 데이터 파일을 종료하고 다시 시도하세요.")
-
 
 def end():
 
@@ -731,6 +841,16 @@ def end():
             squads.append(sol.furlough[i].date)
             indates.append(sol.furlough[i].deadline)
             outdates.append('')
+        usedFur = findUsedFur(sol)
+        if usedFur != 0:
+            for i in range(len(usedFur)-1):
+                names.append('')
+                codes.append('')
+                ranks.append('사용한 휴가')
+                platoons.append(str(usedFur[i+1][0].tm_year) + '-' + str(usedFur[i+1][0].tm_mon) + '-' + str(usedFur[i+1][0].tm_mday))
+                squads.append(str(usedFur[i+1][1].tm_year) + '-' + str(usedFur[i+1][1].tm_mon) + '-' + str(usedFur[i+1][1].tm_mday))
+                indates.append('')
+                outdates.append('')
         names.append('')
         codes.append('')
         ranks.append('')
@@ -746,5 +866,13 @@ def end():
     writer.save()
     return 0
 
+soldiers = []
+excel_file = 'files/3corps_soldiers.xlsx'
+try:
+    writer = pd.ExcelWriter(excel_file, engine='xlsxwriter')
+except:
+    print("파일을 찾을 수 없습니다.")
+    exit()
+board20 = board(2020)
 loadSol()
 index()
