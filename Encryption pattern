@@ -1,0 +1,40 @@
+# ascii test
+import random
+
+"""
+    Making pattern to hide string.
+    2020-06-05
+    Lee JungHyeok.
+"""
+
+arrKeys = []
+for i in range(33, 127):
+    arrKeys.append(chr(i))
+
+arrFakeKeys = []
+
+for nKey in range(len(arrKeys)):
+    while 1:
+        randIndex = random.randint(0,93)
+        if arrKeys[randIndex] != "used":
+            arrFakeKeys.append(arrKeys[randIndex])
+            arrKeys[randIndex] = "used"
+            break
+
+arrKeys = []
+for i in range(33, 127):
+    arrKeys.append(chr(i))
+
+print(arrFakeKeys)
+
+newString = ""
+
+string = "wndgur2"
+for ch in string:
+    newString += arrFakeKeys[arrKeys.index(ch)]
+print(newString)
+
+stringDecoded = ""
+for ch in newString:
+    stringDecoded += arrKeys[arrFakeKeys.index(ch)]
+print(stringDecoded)
