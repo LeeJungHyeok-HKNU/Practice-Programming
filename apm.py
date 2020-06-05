@@ -2,7 +2,7 @@
 """
     Army Personal Management
         
-        2020-06-04
+        2020-06-05
         Lee JungHyeok.
         
         이 프로그램은 아래와 같은 기능을 수행합니다.
@@ -43,8 +43,9 @@
             - 내용 저장(사용자, 사용일, 복귀일) (2020-06-04)
             - 내용 불러옴(배열 solFur) (2020-06-04)
         
-        - 로그인 시스템 (암호화)
-        - 자동 암호화 기능
+        - 로그인 시스템 (2020-06-05)
+        - 로그인 암호화 (2020-06-05)
+        - 자동 암호화 기능 (2020-06-05 in testAscii)
         
 """
 
@@ -616,7 +617,7 @@ class board():
         else:
             self.dateFeb = 28
 
-        self.solFur = [] # [sol, [dateStart, dateEnd], [], []]
+        self.solFur = [] # 데이터 형식: [sol, [dateStart, dateEnd], [], []]
         
         self.boardM = []
 
@@ -866,6 +867,8 @@ def end():
     writer.save()
     return 0
 
+
+login.login()
 soldiers = []
 excel_file = 'files/3corps_soldiers.xlsx'
 try:
