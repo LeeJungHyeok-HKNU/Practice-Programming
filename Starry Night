@@ -2,11 +2,10 @@
 #include <time.h>
 #include <stdlib.h>
 #include <windows.h>
-
 /*
 
 	Starry night.
-	2020-06-30
+	2020-07-02
 	lee junghyeok
 
 */
@@ -30,23 +29,238 @@ int r2;
 //type of star
 int type;
 
+//CONSTS
+const int DISPLAY_WIDTH = 230;
+
 //functions to print
 void printSpace(int x);
+void printStar();
 int printGalaxy(int width);
 void printMoon(int x);
-void printMoonG(int x);
+void printUniverseSpace(int x);
+void printStarSpace(int x);
+void printNormal();
 
 //type of universe 
 void universeNormal();
 void universeGalaxy();
-void endGalaxy(int width);
+void universeVoid();
 
-int galaxyWave(int width);
+//etc functions
+int galaxyWave(int width, int dPointer);
+void voidToNormal();
 
 int main()
 {
 	srand(time(NULL));
 	universeNormal();
+}
+
+void universeNormal()
+{
+	while(1)
+	{
+		type = rand()%1000;
+		if(type>0 and type<=5)
+			type = 1;
+		else if(type>5 and type<=15)
+			type = 2;
+		else if(type>15 and type<=20)
+			type = 3;
+		else if(type>20 and type<=25)
+			type = 5;
+		else if(type>25 and type<=300)
+			type = 4;
+		else if(type>300 and type<=600)
+			type = 6;
+		else if(type>600 and type<=605)
+			universeGalaxy();
+		else if(type < 607)
+		{
+			universeVoid();
+			voidToNormal();
+		}
+		
+		x1 = rand()%DISPLAY_WIDTH;
+		switch(type)
+		{
+			case 0:
+			{
+				x1 -= 20;
+				printMoon(x1);
+				printUniverseSpace(DISPLAY_WIDTH-(x1+23));
+				printf("\n");
+				break;
+			}
+			case 1:
+			{
+				printUniverseSpace(x1);
+				printf("o");
+				printUniverseSpace(DISPLAY_WIDTH-x1-1);
+				printf("\n");
+				break;
+			}
+			case 2:
+			{
+				printUniverseSpace(x1);
+				printf("��");
+				printUniverseSpace(DISPLAY_WIDTH-x1-1);
+				printf("\n");
+				break;
+			}
+			case 3:
+			{
+				printUniverseSpace(x1);
+				printf("��");
+				printUniverseSpace(DISPLAY_WIDTH-x1-1);
+				printf("\n");
+				break;
+			}
+			case 4:
+			{
+				printUniverseSpace(x1);
+				printf("*");
+				printUniverseSpace(DISPLAY_WIDTH-x1-1);
+				printf("\n");
+				break;
+			}
+			case 5:
+			{
+				printUniverseSpace(x1);
+				printf("��");
+				printUniverseSpace(DISPLAY_WIDTH-x1-1);
+				printf("\n");
+				break;
+			}
+			case 6:
+			{
+				x1 = rand()%3;
+				for(i=0;i<x1;i++)
+				{
+					printSpace(DISPLAY_WIDTH);
+					printf("\n");
+				}
+				break;
+			}
+			default:
+			{
+				printUniverseSpace(x1);
+				printf("'");
+				printUniverseSpace(DISPLAY_WIDTH-x1-1);
+				printf("\n");
+				break;
+			}
+		}
+	}
+}
+
+void universeGalaxy()
+{
+	int drawPointer=0;
+	bool endGalaxy = false;
+	int galaxyWidth = rand()%50 + 1;
+	xG = rand()%DISPLAY_WIDTH-galaxyWidth;
+	if (xG<0)
+		xG = 0;
+	for(i=0;i<galaxyWidth;i++)
+	{
+		printUniverseSpace(xG);
+		drawPointer = xG;
+		xG--;
+		galaxyWave(galaxyWidth, drawPointer);
+		drawPointer += printGalaxy(i);
+		printUniverseSpace(DISPLAY_WIDTH-drawPointer);
+		printf("\n");
+	}
+	while(1)
+	{
+		if (endGalaxy == true)
+		{
+			xG++;
+			galaxyWidth -=1;
+		}
+		printUniverseSpace(xG);
+		drawPointer = xG;
+		galaxyWidth = galaxyWave(galaxyWidth, drawPointer);
+		drawPointer += printGalaxy(galaxyWidth);
+		printUniverseSpace(DISPLAY_WIDTH-drawPointer);
+		printf("\n");
+		r2 = rand()%1000;
+		if(r2 == 0)
+			endGalaxy = true;
+		if (galaxyWidth <2)
+			break;
+	}
+}
+
+void universeVoid()
+{
+	for(int v=0;v<500;v++)
+	{
+		int starPrint = rand()%500;
+		if(starPrint>v)
+			printNormal();
+		else
+		{
+			printSpace(DISPLAY_WIDTH);
+			printf("\n");
+		}
+	}
+	while(1)
+	{
+		type = rand()%4000;
+		if(type == 0)
+			break;
+		else if(type <= 50)
+		{
+			printStarSpace(DISPLAY_WIDTH);
+			printf("\n");
+		}
+		else
+		{
+			printSpace(DISPLAY_WIDTH);
+			printf("\n");
+		}
+	}
+}
+
+int galaxyWave(int width, int dPointer)
+{
+	x2 = (rand()%5)*(rand()%4) + rand()%3 + 1;
+	
+	if ((dPointer+width/2)<DISPLAY_WIDTH/2)
+		if (rand()%11 < 4)
+			xG-= x2;
+		else
+			xG+= x2;
+	else
+		if (rand()%11 < 4)
+			xG += x2;
+		else
+			xG -= x2;
+		
+	if (xG<0)
+		xG = 0;
+	
+	if(xG + width > DISPLAY_WIDTH)
+		return DISPLAY_WIDTH - xG;
+	
+	return width;
+}
+
+void voidToNormal()
+{
+	for(int v=0;v<1000;v++)
+	{
+		int starPrint = rand()%1000;
+		if(starPrint<v)
+			printNormal();
+		else
+		{
+			printSpace(DISPLAY_WIDTH);
+			printf("\n");
+		}
+	}
 }
 
 void printSpace(int x)
@@ -58,251 +272,200 @@ void printSpace(int x)
 	}
 }
 
+void printStar()
+{
+	char star;
+	x2 = rand()%9;
+	switch(x2)
+	{
+		case 0:{
+			star = '*';
+			break;
+		}
+		case 1:{
+			star = '*';
+			break;
+		}
+		case 2:{
+			star = '*';
+			break;
+		}
+		case 3:{
+			star = '*';
+			break;
+		}
+		case 4:{
+			star = '*';
+			break;
+		}
+		case 5:{
+			star = 'o';
+			break;
+		}
+		case 6:{
+			star = '.';
+			break;
+		}
+		case 7:{
+			star = ';';
+			break;
+		}
+		case 8:{
+			star = '*';
+			break;
+		}
+	}
+		
+	printf("%c", star);
+}
+
+void printStarSpace(int x)
+{
+	int it;
+	bool starPrinted = false;
+	for(it=0;it<x;it++)
+	{
+		r1 = rand()%x;
+		if ((r1 == 0) && !starPrinted)
+		{
+			printStar();
+			starPrinted = true;
+		}
+		else
+			printf(" ");
+	}
+}
+
+void printNormal()
+{
+	type = rand()%1000;
+	if(type>0 and type<=5)
+		type = 1;
+	else if(type>5 and type<=115)
+		type = 2;
+	else if(type>115 and type<=200)
+		type = 3;
+	else if(type>200 and type<=250)
+		type = 5;
+	else if(type>250 and type<=350)
+		type = 4;
+	
+	x1 = rand()%DISPLAY_WIDTH;
+	switch(type)
+	{
+		case 0:
+		{
+			x1 -= 20;
+			printMoon(x1);
+			printSpace(DISPLAY_WIDTH-(x1+23));
+			printf("\n");
+			break;
+		}
+		case 1:
+		{
+			printSpace(x1);
+			printf("o");
+			printSpace(DISPLAY_WIDTH-x1-1);
+			printf("\n");
+			break;
+		}
+		case 2:
+		{
+			printSpace(x1);
+			printf("��");
+			printSpace(DISPLAY_WIDTH-x1-1);
+			printf("\n");
+			break;
+		}
+		case 3:
+		{
+			printSpace(x1);
+			printf("��");
+			printSpace(DISPLAY_WIDTH-x1-1);
+			printf("\n");
+			break;
+		}
+		case 4:
+		{
+			printSpace(x1);
+			printf("*");
+			printSpace(DISPLAY_WIDTH-x1-1);
+			printf("\n");
+			break;
+		}
+		case 5:
+		{
+			printSpace(x1);
+			printf("��");
+			printSpace(DISPLAY_WIDTH-x1-1);
+			printf("\n");
+			break;
+		}
+		default:
+		{
+			printSpace(x1);
+			printf("'");
+			printSpace(DISPLAY_WIDTH-x1-1);
+			printf("\n");
+			break;
+		}
+	}
+}
+
+void printUniverseSpace(int x)
+{
+	int it;
+	for(it=0;it<x;it++)
+	{
+		r1 = rand()%(x+50);
+		if (r1 == 0)
+			printStar();
+		else
+			printf(" ");
+	}
+}
+
 void printMoon(int x)
 {
 	for(i=0;i<5;i++)
 	{
 		if(i<3)
 		{
-			printSpace(x-i);
-			for(j=0;j<=i;j++)
+			printUniverseSpace(x-i);
+			for(j=0;j<=i+2;j++)
 			{
 				printf("��");
 			}
+			printUniverseSpace(DISPLAY_WIDTH-x-i);
 			printf("\n");
 		}
 		else
 		{
-			printSpace(x-(4-i));
-			for(j=0;j<5-i;j++)
+			printUniverseSpace(x-(4-i));
+			for(j=0;j<=6-i;j++)
 			{
 				printf("��");
 			}
+			printUniverseSpace(DISPLAY_WIDTH-i-x-4);
 			printf("\n");
 		}
-	}
-}
-
-void printMoonG(int x, int xg)
-{
-	for(i=0;i<5;i++)
-	{
-		if(i<3)
-		{
-			printSpace(x-i);
-			for(j=0;j<=i;j++)
-			{
-				printf("��");
-			}
-			for(j=0;j<(xg - x); j++)
-			{
-				printf("*");
-			}
-			printf("\n");
-		}
-		else
-		{
-			printSpace(x-(4-i));
-			for(j=0;j<5-i;j++)
-			{
-				printf("��");
-			}
-			for(j=0;j<(xg - x); j++)
-			{
-				printf("*");
-			}
-			printf("\n");
-		}
-		if(rand()%2 == 0)
-			xg--;
-		else
-			xg++;
-	}
-}
-
-void universeNormal()
-{
-	while(1)
-	{
-		type = rand()%1000;
-		if(type>0 and type<=5)
-			type = 1;
-		if(type>5 and type<=15)
-			type = 2;
-		if(type>15 and type<=20)
-			type = 3;
-		if(type>20 and type<=25)
-			type = 5;
-		if(type>25 and type<=300)
-			type = 4;
-		if(type>300 and type<=600)
-			type = 6;
-		if(type>600 and type<=610)
-			universeGalaxy();
-		switch(type)
-		{
-			case 0:
-			{
-				x2 = rand()%150;
-				printMoon(x2);
-				break;
-			}
-			case 1:
-			{
-				x1 = rand()%235;
-				printSpace(x1);
-				printf("o\n");
-				break;
-			}
-			case 2:
-			{
-				x1 = rand()%235;
-				printSpace(x1);
-				printf("��\n");
-				break;
-			}
-			case 3:
-			{
-				x1 = rand()%235;
-				printSpace(x1);
-				printf("��\n");
-				break;
-			}
-			case 4:
-			{
-				x1 = rand()%235;
-				printSpace(x1);
-				printf("*\n");
-				break;
-			}
-			case 5:
-			{
-				x1 = rand()%235;
-				printSpace(x1);
-				printf("��\n");
-				break;
-			}
-			case 6:
-			{
-				x1 = rand()%5;
-				for(i=0;i<x1;i++)
-				{
-					printf("\n");
-				}
-				break;
-			}
-			default:
-			{
-				x1 = rand()%235;
-				printSpace(x1);
-				printf("'\n");
-				break;
-			}
-		}
-	}
-}
-
-void universeGalaxy()
-{
-	xG = rand()%185;
-	bool endGalaxy = false;
-	int galaxyWidth = rand()%80 + 1;
-	for(i=0;i<galaxyWidth;i++)
-	{
-		printSpace(xG);
-		xG--;
-		printGalaxy(i);
-		galaxyWave(galaxyWidth);
-	}
-	while(1)
-	{
-		if (endGalaxy == true)
-		{
-			xG++;
-			galaxyWidth -=1;
-		}
-		printSpace(xG);
-		printGalaxy(galaxyWidth);
-		if(galaxyWave(galaxyWidth) == 1)
-			galaxyWidth -= 10;
-		r2 = rand()%1000;
-		if(r2 == 0)
-			endGalaxy = true;
-		if (galaxyWidth <2)
-			break;
 	}
 }
 
 int printGalaxy(int width)
 {
 	bool done = false;
-	char star;
+	int len = 0;
 	for(k=0;k<width;k++)
 	{
-		x2 = rand()%9;
-		switch(x2)
-		{
-			case 0:{
-				star = '*';
-				break;
-			}
-			case 1:{
-				star = '*';
-				break;
-			}
-			case 2:{
-				star = '*';
-				break;
-			}
-			case 3:{
-				star = '*';
-				break;
-			}
-			case 4:{
-				star = '*';
-				break;
-			}
-			case 5:{
-				star = 'o';
-				break;
-			}
-			case 6:{
-				star = '.';
-				break;
-			}
-			case 7:{
-				star = ';';
-				break;
-			}
-			case 8:{
-				star = '*';
-				break;
-			}
-		}
-			
-		printf("%c", star);
+		printStar();
 		
 		r1 = rand()%3;
 		printSpace(r1);
+		k += r1;
+		
+		len += r1;
 	}
-	printf("\n");
-	return 1;
+	return len + width;
 }
 
-int galaxyWave(int width)
-{
-	x2 = rand()%3 + 1;
-	
-	if (rand()%2 == 0)
-		xG+= x2;
-	else
-		xG-= x2;
-	
-	if (xG<0)
-		xG = 0;
-	
-	if(xG + width * 3 > 200)
-		return 1;
-	
-	return 0;
-}
