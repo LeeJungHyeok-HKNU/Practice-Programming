@@ -5,7 +5,7 @@
 /*
 
 	Starry night.
-	2020-07-02
+	2020-07-03
 	lee junghyeok
 
 */
@@ -149,7 +149,6 @@ void universeVoid()
 
 void universeStar()
 {
-	printf("universeStar");
 	int universeType = 0;
 	while(1)
 	{
