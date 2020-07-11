@@ -1,0 +1,101 @@
+"""
+    숫자야구
+    2020-07-11
+    Lee Junghyeok
+"""
+import random
+import time
+
+def setNumber():
+    """
+        겹치지 않는 무작위 네 자리의 십진수를 출력합니다.
+    """
+    listN = [0,1,2,3,4,5,6,7,8,9]
+    firstN = random.randint(0,9)
+    listN[listN.index(firstN)] = 'x'
+
+    secondN = listN[random.randint(0,9)]
+    while secondN == 'x':
+        secondN = listN[random.randint(0,9)]
+    listN[listN.index(secondN)] = 'x'
+    
+    thirdN = listN[random.randint(0,9)]
+    while thirdN == 'x':
+        thirdN = listN[random.randint(0,9)]
+    listN[listN.index(thirdN)] = 'x'
+    
+    fourthN = listN[random.randint(0,9)]
+    while fourthN == 'x':
+        fourthN = listN[random.randint(0,9)]
+    listN[listN.index(fourthN)] = 'x'
+    
+    return str(firstN) + str(secondN) + str(thirdN) + str(fourthN)
+
+def printResult(guess, target):
+    """
+        추측 숫자와 맞춰야 하는 수의 관계를 스트라이크(자리와 수가 일치), 볼(자리 불일치, 수 일치)로 나타냅니다.
+    """
+    strike = 0
+    ball = 0
+    for nG in str(guess):
+        for nT in str(target):
+            if nG == nT:
+                if guess.index(nG) == target.index(nT):
+                    strike += 1
+                else:
+                    ball += 1
+    print(strike, "strike,", ball, "ball.")
+    if strike == 4:
+        print("정답입니다!\n\n******************************")
+        time.sleep(5)
+        return 1
+    else:
+        return 0
+    
+
+while 1:
+    start = input("숫자야구를 시작합니까?(*Y/N)\n")
+    if (start.upper() == 'N') or (start.upper() == 'ㅜ'):
+        print("프로그램을 종료합니다.")
+        break
+    print("숫자야구를 시작하겠습니다.")
+    
+    A = setNumber()
+    B = setNumber()
+    while A == B:
+        A = setNumber()
+        B = setNumber()
+    print("랜덤 숫자를 받아오는 중입니다.", end = "")
+    time.sleep(1)
+    print(" .", end="")
+    time.sleep(1)
+    print(" .", end="")
+    time.sleep(1)
+    print(" .")
+    print("3초 뒤 A의 숫자를 공개합니다. B는 뒤를 돌아주세요.")
+    time.sleep(3)
+    print("당신의 수는\n\n", A, "\n\n입니다.")
+    input("숫자를 외우거나 적어주세요. 끝났으면 아무거나 입력해주세요.")
+
+    for i in range(30):
+        print("\n")
+    
+    print("3초 뒤 B의 숫자를 공개합니다. A는 뒤를 돌아주세요.")
+    time.sleep(3)
+    print("당신의 수는\n\n", B, "\n\n입니다.")
+    input("숫자를 외우거나 적어주세요. 끝났으면 아무거나 입력해주세요.")
+    
+    for i in range(30):
+        print("\n")
+
+    print("숫자야구 본 게임을 시작합니다!")
+    result = 0
+    turn = 0
+    while result == 0:
+        turn %= 2
+        if turn == 0:
+            result = printResult(input("A의 차례입니다. 추측 수를 입력하세요.\n"), B)
+        else:
+            result = printResult(input("B의 차례입니다. 추측 수를 입력하세요.\n"), A)
+        turn += 1
+    
