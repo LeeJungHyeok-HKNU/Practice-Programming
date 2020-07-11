@@ -52,13 +52,27 @@ def printResult(guess, target):
     else:
         return 0
     
+def startSolo():
+    print("1인용 숫자야구를 시작하겠습니다.")
+    
+    B = setNumber()
+    print("랜덤 숫자를 받아오는 중입니다.", end = "")
+    time.sleep(1)
+    print(" .", end="")
+    time.sleep(1)
+    print(" .", end="")
+    time.sleep(1)
+    print(" .")
+    print("숫자야구 본 게임을 시작합니다!")
+    result = 0
+    question = 0
+    while result == 0:
+        result = printResult(input("추측 수를 입력하세요.\n"), B)
+        question += 1
+    print("질문을 ", question,"번 했습니다.\n")
 
-while 1:
-    start = input("숫자야구를 시작합니까?(*Y/N)\n")
-    if (start.upper() == 'N') or (start.upper() == 'ㅜ'):
-        print("프로그램을 종료합니다.")
-        break
-    print("숫자야구를 시작하겠습니다.")
+def startDuo():
+    print("2인용 숫자야구를 시작하겠습니다.")
     
     A = setNumber()
     B = setNumber()
@@ -98,4 +112,17 @@ while 1:
         else:
             result = printResult(input("B의 차례입니다. 추측 수를 입력하세요.\n"), A)
         turn += 1
-    
+
+while 1:
+    start = input("숫자야구를 시작합니까?(*Y/N)\n")
+    if (start.upper() == 'N') or (start.upper() == 'ㅜ'):
+        print("프로그램을 종료합니다.")
+        break
+
+    soloQuestion = input("1인용/2인용 (1/2)\n")
+    if soloQuestion == '1':
+        startSolo()
+    elif soloQuestion == '2':
+        startDuo()
+    else:
+        print("올바르지 않은 입력입니다. 다시 시도하세요.")
