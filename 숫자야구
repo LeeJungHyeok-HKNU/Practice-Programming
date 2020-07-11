@@ -114,15 +114,17 @@ def startDuo():
         turn += 1
 
 while 1:
-    start = input("숫자야구를 시작합니까?(*Y/N)\n")
-    if (start.upper() == 'N') or (start.upper() == 'ㅜ'):
+    start = input("숫자야구를 시작합니까?(Y/N)\n")
+    if (start.upper() == 'N') or (start == 'ㅜ'):
         print("프로그램을 종료합니다.")
         break
-
-    soloQuestion = input("1인용/2인용 (1/2)\n")
-    if soloQuestion == '1':
-        startSolo()
-    elif soloQuestion == '2':
-        startDuo()
+    elif (start.upper() == 'Y') or (start.upper() == 'ㅛ'):
+        soloQuestion = input("1인용/2인용 (1/2)\n")
+        if soloQuestion == '1':
+            startSolo()
+        elif soloQuestion == '2':
+            startDuo()
+        else:
+            print("올바르지 않은 입력입니다. 다시 시도하세요.")
     else:
         print("올바르지 않은 입력입니다. 다시 시도하세요.")
